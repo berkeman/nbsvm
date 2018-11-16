@@ -327,8 +327,11 @@ while [[ -n "$1" ]]; do
 
     # Connect to the VM's VNC console.
     vnc)
-      socat TCP-LISTEN:${vnc_port:-5900},reuseaddr,fork UNIX-CLIENT:$drawer/vnc.sock &
-      vncviewer localhost:${vnc_port:-5900}
+      vncargs=(-PreferredEncoding=raw -AutoSelect=0)
+      if [[ "$vncclipboard" -gt 0 ]]; then
+        vncargs+=(-SendPrimary=0 -SendClipboard=0 -SetPrimary=0 -AcceptClipboard=0)
+      fi
+      tigervncviewer "${vncargs[@]}" $drawer/vnc.sock
       ;;
 
     # Print this VM's status (or the connection error) and exit with
