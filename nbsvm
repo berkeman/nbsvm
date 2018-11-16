@@ -224,6 +224,11 @@ while [[ -n "$1" ]]; do
         _copy_array args runargs
       fi
 
+      if [[ -e $drawer/qemu.sock ]]; then
+        echo "Machine appears to already be running"
+        exit 1
+      fi
+
       # Prepare filesystem.
       $root mkdir -p $drawer
       echo Laundering old socks.
