@@ -75,8 +75,11 @@ set_drive_devs() {
   fi
 
   unset drive_devs
+  if [[ -e $prefix ]]; then
+    _make_array drive_devs $prefix
+  fi
   if [[ -e $prefix-0 ]]; then
-    _make_array drive_devs $prefix-[0-9]
+    _make_array --append drive_devs $prefix-[0-9]
     if [[ -e $prefix-10 ]]; then
       _make_array --append drive_devs $prefix-[1-9][0-9]
     fi
