@@ -262,8 +262,9 @@ while [[ -n "$1" ]]; do
              -netdev tap,id=net,ifname=tap-${class:+$class-}$vm,script=no,downscript=no
            }                                               \
                                                            \
-           "${runargs[@]}" <"$log" 1>&0 2<&0 &
+           "${runargs[@]}" <"$log" 1>"$log" 2>&1 &
 
+# why does this not use qemu -daemonize instead of a waitloop?
       # Footle socks (they're not gloves).
       echo -n Waiting for clean socks...
       count=0
