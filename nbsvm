@@ -18,6 +18,20 @@ if [[ -z "$class" && "${0##*/}" != "nbsvm" ]]; then
   class=${class%vm}
 fi
 
+[[ -e /var/lib ]] && _var=/var/lib || _var=/var
+
+# Special case "nbsvm list" or no args to list running VMs (in the default class)
+if [[ $# -lt 1 || "$1" = "list" ]]; then
+  for sock in $_var/nbsvm${class:+-$class}/*/qemu.sock; do
+    status=$(echo info status | socat - UNIX-CONNECT:"$sock" 2>/dev/null | grep -A1 info\ status | tail -n1 | tr -d \\r)
+    if [[ "${status#*: }" = "running" ]]; then
+      tmp="${sock#$_var/nbsvm${class:+-$class}/}"
+      echo "${tmp%%/qemu.sock}"
+    fi
+  done
+  exit
+fi
+
 # The first argument is always the VM's name.
 vm=$1
 shift
@@ -38,7 +52,6 @@ fi
 root=${root:-$_default_root}
 store=${store:-lvm}
 dev=${dev:-nbsvm${class:+-$class}-$vm}
-[[ -e /var/lib ]] && _var=/var/lib || _var=/var
 drawer=${drawer:-$_var/nbsvm${class:+-$class}/$vm}
 if tty >/dev/null 2>&1; then
   : ${socat_tty:=-,raw,echo=0,escape=0x1d}
