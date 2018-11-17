@@ -249,7 +249,7 @@ while [[ -n "$1" ]]; do
       unset drives_arg
       for _d in "${drive_devs[@]}"; do
         # Bash can do ${drive_decs[@]/#/...}, ksh can't
-        drives_arg="$drives_arg -drive if=${drive_id:-virtio},file=$_d"
+        drives_arg="$drives_arg -drive if=${drive_id:-virtio},file=$_d,format=raw"
       done
       log=${log:-${debug:-/dev/null}}
       if [[ $log = 1 ]]; then log=/dev/stderr; fi
