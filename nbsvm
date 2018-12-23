@@ -241,8 +241,11 @@ while [[ -n "$1" ]]; do
       fi
 
       if [[ -e $drawer/qemu.sock ]]; then
-        echo "Machine appears to already be running"
-        exit 1
+        status=$(echo info status | socat - UNIX-CONNECT:"$drawer/qemu.sock" 2>/dev/null | grep -A1 info\ status | tail -n1 | tr -d \\r)
+        if [[ -n "$status" ]]; then
+          echo "Machine appears to already be running"
+          exit 1
+        fi
       fi
 
       # Prepare filesystem.
