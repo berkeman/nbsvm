@@ -279,7 +279,7 @@ while [[ -n "$1" ]]; do
                                                            \
            ${display:--display vnc=unix:$drawer/vnc.sock}  \
                                                            \
-           ${usb:--usb -usbdevice tablet}                  \
+           ${usb:--usb -device usb-tablet}                 \
                                                            \
            ${network:-
              -device ${net_if:-virtio-net-pci},netdev=net${mac:+,mac=$mac}
