@@ -295,13 +295,13 @@ while [[ -n "$1" ]]; do
       take_sock() {
         while ! ls "$1" >/dev/null 2>&1; do
           ((count+=1))
-          # Print a '.' every ~5 seconds
+          # Print a '.' every ~0.5 seconds
           if [[ x"${count%[50]}" != x"$count" ]]; then echo -n .; fi
-          if [[ $count -ge 60 ]]; then
+          if [[ $count -ge 600 ]]; then
             echo Giving up waiting for "$1" >&2
             return # Don't return an error even though it is.
           fi
-          sleep 1
+          sleep 0.1
         done
         $root chgrp ${group:-$(getent group $(id -g) | cut -d: -f1)} "$1"
         $root chmod g+w "$1"
