@@ -269,6 +269,14 @@ while [[ -n "$1" ]]; do
       done
       log=${log:-${debug:-/dev/null}}
       if [[ $log = 1 ]]; then log=/dev/stderr; fi
+
+      for d in $(seq 2 ${networks:-0}); do
+	  thismac=mac${d}
+	  thismac=${!thismac}
+	  extranets=$extranets" -device ${net_if:-virtio-net-pci},netdev=net${d}${thismac:+,mac=$thismac}
+	      -netdev tap,id=net${d},ifname=tap${d}-${class:+$class-}$vm,script=no,downscript=no"
+      done
+
       $root ${hypervisor:-kvm} --name ${class:+$class-}$vm \
            -m ${mem:-512}                                  \
            ${smp:+-smp $smp}                               \
@@ -285,6 +293,7 @@ while [[ -n "$1" ]]; do
              -device ${net_if:-virtio-net-pci},netdev=net${mac:+,mac=$mac}
              -netdev tap,id=net,ifname=tap-${class:+$class-}$vm,script=no,downscript=no
            }                                               \
+           ${extranets:+$extranets}                        \
                                                            \
            "${runargs[@]}" <"$log" 1>"$log" 2>&1 &
 
@@ -324,7 +333,16 @@ while [[ -n "$1" ]]; do
           $root brctl addif $bridge tap-${class:+$class-}$vm
         fi
       fi
-
+      for d in $(seq 2 ${networks:-0}); do
+	  echo Bringing up tap device tap${d}-${class:+$class-}$vm
+	  $root ifconfig tap${d}-${class:+$class-}$vm up
+	  thisbridge=bridge${d}
+	  thisbridge=${!thisbridge}
+          if [ "$thisbridge" ]; then
+              echo Adding tap device to bridge $thisbridge
+              $root brctl addif $thisbridge tap${d}-${class:+$class-}$vm
+          fi
+      done
       # Execute a post-launch script.
       if [[ -e /etc/nbsvm/${class:+$class-}$vm.post ]]; then
         # Use a subshell to preserve this binary's environment.
